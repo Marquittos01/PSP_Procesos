@@ -4,33 +4,50 @@ import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
+import java.time.LocalTime;
 import java.util.Date;
 
 public class Main {
     public static void main(String[] args) {
         try {
+            // Obtener la hora actual para el mensaje
+            String horaActual = LocalTime.now().toString();
 
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-            String horaActual = sdf.format(new Date());
-            int hora = Integer.parseInt(horaActual.split(":")[0]);
+            // Comando msg con el mensaje que deseas mostrar
+            String msgComando = "cmd /c msg * \"Buenas tardes, son las " + horaActual + ". Realizando la comprobación rutinaria del disco...\"";
+            ejecutarComando(msgComando);  // Ejecutar el primer mensaje
 
-            String saludo;
-            if (hora >= 6 && hora < 13) {
-                saludo = "Buenos dias";
-            } else if (hora >= 13 && hora < 20) {
-                saludo = "Buenas tardes";
-            } else {
-                saludo = "Buenas noches";
-            }
+            // Ejecutar el comando sfc /scannow
+            System.out.println("Ejecutando sfc /scannow...");
+            String sfcComando = "cmd /c sfc /scannow";
+            ejecutarComando(sfcComando);
 
-            String mensaje = saludo + ", son las " + horaActual + ". Realizando la comprobacion rutinaria del disco...";
+            // Mostrar el mensaje de éxito del escaneo
+            String msgEscaneo = "cmd /c msg * \"El escaneo de malware se ha realizado con exito.\"";
+            ejecutarComando(msgEscaneo);
 
-            ProcessBuilder processBuilder = new ProcessBuilder("cmd","/c","msg * "+mensaje);
+            // Ejecutar el comando chkdsk C:
+            System.out.println("Ejecutando chkdsk C:...");
+            String chkdskComando = "cmd /c chkdsk C:";
+            ejecutarComando(chkdskComando);
+
+            // Mostrar el mensaje de éxito de la comprobación del disco
+            String msgComprobacionDisco = "cmd /c msg * \"La comprobacion del disco C: se ha realizado con exito.\"";
+            ejecutarComando(msgComprobacionDisco);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void ejecutarComando(String comando) {
+        try {
+            // Crear el ProcessBuilder
+            ProcessBuilder processBuilder = new ProcessBuilder("cmd", "/c", comando);
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
 
-            System.out.println("Mensaje enviado con privilegios elevados.");
-
+            // Leer la salida del proceso
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
@@ -39,7 +56,6 @@ public class Main {
 
             int exitCode = process.waitFor();
             System.out.println("Proceso completado con código de salida: " + exitCode);
-
         } catch (Exception e) {
             e.printStackTrace();
         }
